@@ -246,7 +246,7 @@ def auth():
     auth_url, state = flow.authorization_url(
     access_type='offline',
     include_granted_scopes='true',
-    code_challenge_method=None
+    
     )
     session['state'] = state
     return redirect(auth_url)
