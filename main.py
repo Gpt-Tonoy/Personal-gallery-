@@ -255,7 +255,8 @@ def auth():
 @app.route('/callback')
 def callback():
     flow = get_flow()
-    flow.fetch_token(authorization_response=request.url)
+    authorization_response = request.url.replace('http://', 'https://')
+flow.fetch_token(authorization_response=authorization_response)
     credentials = flow.credentials
     creds_data = {
         'token': credentials.token,
