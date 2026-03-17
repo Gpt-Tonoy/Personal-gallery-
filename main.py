@@ -1,18 +1,24 @@
-from flask import Flask, redirect, url_for, session, request, jsonify, send_file, render_template_string
+import os, json, io
+import requests as req
+from flask import Flask, redirect, session, request, jsonify, render_template_string
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
-import os, json, io, requests as req
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'tonoy-secret-2026')
+app.secret_key = 'tonoy-secret-2026'
 
 CLIENT_ID = '565165560969-k126trc6ugj7lp2au2l438k5di2ppg64.apps.googleusercontent.com'
 CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
-APP_URL = 'https://personal-gallery-production-e2b9.up.railway.app'
 REDIRECT_URI = 'https://personal-gallery-production-e2b9.up.railway.app/callback'
-SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
+SCOPES = [
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'openid'
+]
 
 def get_flow():
     return Flow.from_client_config(
@@ -20,7 +26,8 @@ def get_flow():
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token"
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": [REDIRECT_URI]
         }},
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI
@@ -81,12 +88,12 @@ textarea{height:80px;resize:none}
   <div class="tab" onclick="showTab(\'todos\')">✅ To-Do</div>
 </div>
 <div id="drive" class="section active">
-  <div class="stats" id="driveStats">
+  <div class="stats">
     <div class="stat-card"><h2 id="totalFiles">0</h2><p>Total Files</p></div>
     <div class="stat-card"><h2 id="totalStorage">0 GB</h2><p>Used Storage</p></div>
   </div>
   <div class="card">
-    <div id="accountList"></div>
+    <div id="accountList"><p style="color:#888;font-size:13px">No accounts connected</p></div>
     <button class="btn btn-google" onclick="connectDrive()">+ Connect Google Drive</button>
   </div>
   <div class="card">
@@ -132,26 +139,32 @@ function showTab(name){
 }
 function connectDrive(){window.location.href=\'/auth\'}
 async function loadDrive(){
-  const r=await fetch(\'/drive/files\')
-  const data=await r.json()
-  const el=document.getElementById(\'driveFileList\')
-  const accounts=document.getElementById(\'accountList\')
-  if(data.error){accounts.innerHTML=\'<p style="color:#888;font-size:13px">No accounts connected</p>\';el.innerHTML=\'\';return}
-  document.getElementById(\'totalFiles\').textContent=data.files?data.files.length:0
-  accounts.innerHTML=data.accounts?data.accounts.map(a=>`
-    <div class="account-card">
-      <div><p style="font-size:13px">${a.email}</p>
-      <div class="storage-bar"><div class="storage-fill" style="width:${a.percent}%"></div></div>
-      <p style="font-size:11px;color:#888;margin-top:3px">${a.used} / ${a.total}</p></div>
-      <button class="btn-red btn" onclick="disconnectAccount(\'${a.email}\')">Remove</button>
-    </div>`).join(\'\'):\'\'
-  if(!data.files||!data.files.length){el.innerHTML=\'<div class="empty">No files yet</div>\';return}
-  el.innerHTML=data.files.map(f=>`
-    <div class="file-item">
-      <span>📄 ${f.name}</span>
-      <button class="dl-btn" onclick="window.open(\'${f.url}\')">⬇️</button>
-      <button class="del-btn" onclick="deleteFile(\'${f.id}\')">🗑️</button>
-    </div>`).join(\'\')
+  try{
+    const r=await fetch(\'/drive/files\')
+    const data=await r.json()
+    const el=document.getElementById(\'driveFileList\')
+    const accounts=document.getElementById(\'accountList\')
+    if(!data.accounts||!data.accounts.length){
+      accounts.innerHTML=\'<p style="color:#888;font-size:13px">No accounts connected</p>\'
+      el.innerHTML=\'\'
+      return
+    }
+    document.getElementById(\'totalFiles\').textContent=data.files?data.files.length:0
+    accounts.innerHTML=data.accounts.map(a=>`
+      <div class="account-card">
+        <div><p style="font-size:13px">${a.email}</p>
+        <div class="storage-bar"><div class="storage-fill" style="width:${a.percent}%"></div></div>
+        <p style="font-size:11px;color:#888;margin-top:3px">${a.used} / ${a.total}</p></div>
+        <button class="btn-red btn" onclick="disconnectAccount(\'${a.email}\')">Remove</button>
+      </div>`).join(\'\')
+    if(!data.files||!data.files.length){el.innerHTML=\'<div class="empty">No files yet</div>\';return}
+    el.innerHTML=data.files.map(f=>`
+      <div class="file-item">
+        <span>📄 ${f.name}</span>
+        <button class="dl-btn" onclick="window.open(\'${f.url}\')">⬇️</button>
+        <button class="del-btn" onclick="deleteFile(\'${f.id}\')">🗑️</button>
+      </div>`).join(\'\')
+  }catch(e){console.log(e)}
 }
 async function uploadToDrive(){
   const files=document.getElementById(\'driveFileInput\').files
@@ -178,13 +191,15 @@ async function uploadPhotos(){
   loadPhotos()
 }
 async function loadPhotos(){
-  const r=await fetch(\'/drive/files\')
-  const data=await r.json()
-  const el=document.getElementById(\'photoGrid\')
-  if(data.error||!data.files){el.innerHTML=\'<div class="empty" style="grid-column:span 2">Connect Google Drive first</div>\';return}
-  const imgs=data.files.filter(f=>/\\.(jpg|jpeg|png|gif|webp)/i.test(f.name))
-  if(!imgs.length){el.innerHTML=\'<div class="empty" style="grid-column:span 2">No photos yet</div>\';return}
-  el.innerHTML=imgs.map(f=>`<img src="${f.thumb||f.url}" onclick="window.open(\'${f.url}\')">`).join(\'\')
+  try{
+    const r=await fetch(\'/drive/files\')
+    const data=await r.json()
+    const el=document.getElementById(\'photoGrid\')
+    if(!data.files||!data.files.length){el.innerHTML=\'<div class="empty" style="grid-column:span 2">Connect Google Drive first</div>\';return}
+    const imgs=data.files.filter(f=>/\\.(jpg|jpeg|png|gif|webp)/i.test(f.name))
+    if(!imgs.length){el.innerHTML=\'<div class="empty" style="grid-column:span 2">No photos yet</div>\';return}
+    el.innerHTML=imgs.map(f=>`<img src="${f.thumb||f.url}" onclick="window.open(\'${f.url}\')">`).join(\'\')
+  }catch(e){}
 }
 async function saveNote(){
   const title=document.getElementById(\'noteTitle\').value
@@ -243,35 +258,34 @@ def index():
 @app.route('/auth')
 def auth():
     flow = get_flow()
-    auth_url, state = flow.authorization_url(
-    access_type='offline',
-    include_granted_scopes='true',
-    
-    )
+    auth_url, state = flow.authorization_url(access_type='offline')
     session['state'] = state
-    return redirect(auth_url)
     return redirect(auth_url)
 
 @app.route('/callback')
 def callback():
-    flow = get_flow()
-    authorization_response = request.url.replace('http://', 'https://')
-flow.fetch_token(authorization_response=authorization_response)
-    credentials = flow.credentials
-    creds_data = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': list(credentials.scopes) if credentials.scopes else []
-    }
-    token_info = req.get(f'https://www.googleapis.com/oauth2/v1/userinfo?access_token={credentials.token}').json()
-    email = token_info.get('email', 'unknown@gmail.com')
-    accounts = session.get('accounts', {})
-    accounts[email] = creds_data
-    session['accounts'] = accounts
-    return redirect('/')
+    try:
+        flow = get_flow()
+        flow.fetch_token(authorization_response=request.url.replace('http://', 'https://'))
+        credentials = flow.credentials
+        creds_data = {
+            'token': credentials.token,
+            'refresh_token': credentials.refresh_token,
+            'token_uri': credentials.token_uri,
+            'client_id': credentials.client_id,
+            'client_secret': credentials.client_secret,
+            'scopes': list(credentials.scopes) if credentials.scopes else []
+        }
+        token_info = req.get(
+            f'https://www.googleapis.com/oauth2/v1/userinfo?access_token={credentials.token}'
+        ).json()
+        email = token_info.get('email', 'unknown@gmail.com')
+        accounts = session.get('accounts', {})
+        accounts[email] = creds_data
+        session['accounts'] = accounts
+        return redirect('/')
+    except Exception as e:
+        return f'Error: {str(e)}', 500
 
 @app.route('/auth/disconnect', methods=['POST'])
 def disconnect():
@@ -286,7 +300,7 @@ def disconnect():
 def drive_files():
     accounts = session.get('accounts', {})
     if not accounts:
-        return jsonify({'error': 'No accounts'})
+        return jsonify({'files': [], 'accounts': []})
     all_files = []
     account_info = []
     for email, creds_data in accounts.items():
@@ -303,14 +317,12 @@ def drive_files():
                 pageSize=50,
                 fields="files(id,name,mimeType,size,webViewLink,thumbnailLink)"
             ).execute()
-            files = results.get('files', [])
-            for f in files:
+            for f in results.get('files', []):
                 all_files.append({
                     'id': f['id'],
                     'name': f['name'],
                     'url': f.get('webViewLink', ''),
-                    'thumb': f.get('thumbnailLink', ''),
-                    'account': email
+                    'thumb': f.get('thumbnailLink', '')
                 })
             about = service.about().get(fields='storageQuota').execute()
             quota = about.get('storageQuota', {})
@@ -349,8 +361,6 @@ def drive_upload():
 @app.route('/drive/delete/<file_id>', methods=['DELETE'])
 def drive_delete(file_id):
     accounts = session.get('accounts', {})
-    if not accounts:
-        return jsonify({'error': 'No accounts'})
     for email, creds_data in accounts.items():
         try:
             creds = Credentials(
@@ -389,11 +399,9 @@ def notes():
 @app.route('/notes/<int:i>', methods=['DELETE'])
 def delete_note(i):
     NOTES_FILE = '/tmp/notes.json'
-    def load():
-        try:
-            with open(NOTES_FILE) as f: return json.load(f)
-        except: return []
-    data = load()
+    try:
+        with open(NOTES_FILE) as f: data = json.load(f)
+    except: data = []
     if i < len(data): data.pop(i)
     with open(NOTES_FILE, 'w') as f: json.dump(data, f)
     return jsonify({'ok': True})
