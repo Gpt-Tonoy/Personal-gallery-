@@ -3,32 +3,37 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
-import os, json, io
+import os, json, io, requests as req
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'tonoy-secret-2026')
+
 CLIENT_ID = '565165560969-k126trc6ugj7lp2au2l438k5di2ppg64.apps.googleusercontent.com'
 CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 APP_URL = 'https://personal-gallery-production-e2b9.up.railway.app'
 REDIRECT_URI = 'https://personal-gallery-production-e2b9.up.railway.app/callback'
-
-SCOPES = ['https://www.googleapis.com/auth/drive']
+SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/userinfo.email', 'openid']
 
 def get_flow():
     return Flow.from_client_config(
-        {"web": {"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
-                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                 "token_uri": "https://oauth2.googleapis.com/token"}},
-        scopes=SCOPES, redirect_uri=REDIRECT_URI)
+        {"web": {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token"
+        }},
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI
+    )
 
 HTML = '''<!DOCTYPE html>
 <html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M. Tonoy's Gallery</title>
+<title>M. Tonoy\'s Gallery</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',sans-serif;background:#0a0a14;color:white;min-height:100vh}
+body{font-family:\'Segoe UI\',sans-serif;background:#0a0a14;color:white;min-height:100vh}
 .header{background:linear-gradient(135deg,#1a1a3e,#0d0d2b);padding:20px;text-align:center;border-bottom:1px solid #2a2a5a}
 .logo{font-size:28px;font-weight:bold;color:#7c6fff}.logo span{color:white}
 .tabs{display:flex;background:#111125;border-bottom:1px solid #2a2a5a;overflow-x:auto}
@@ -75,7 +80,6 @@ textarea{height:80px;resize:none}
   <div class="tab" onclick="showTab(\'notes\')">📝 Notes</div>
   <div class="tab" onclick="showTab(\'todos\')">✅ To-Do</div>
 </div>
-
 <div id="drive" class="section active">
   <div class="stats" id="driveStats">
     <div class="stat-card"><h2 id="totalFiles">0</h2><p>Total Files</p></div>
@@ -92,7 +96,6 @@ textarea{height:80px;resize:none}
   </div>
   <div id="driveFileList"></div>
 </div>
-
 <div id="photos" class="section">
   <div class="card">
     <input type="file" id="photoInput" accept="image/*" multiple>
@@ -100,7 +103,6 @@ textarea{height:80px;resize:none}
   </div>
   <div class="photo-grid" id="photoGrid"></div>
 </div>
-
 <div id="notes" class="section">
   <div class="card">
     <input type="text" id="noteTitle" placeholder="Title">
@@ -109,7 +111,6 @@ textarea{height:80px;resize:none}
   </div>
   <div id="noteList"></div>
 </div>
-
 <div id="todos" class="section">
   <div class="card">
     <input type="text" id="todoInput" placeholder="Add new task..." onkeypress="if(event.key==\'Enter\')addTodo()">
@@ -117,7 +118,6 @@ textarea{height:80px;resize:none}
   </div>
   <div id="todoList"></div>
 </div>
-
 <script>
 function showTab(name){
   document.querySelectorAll(\'.tab\').forEach((t,i)=>{
@@ -130,9 +130,7 @@ function showTab(name){
   if(name===\'notes\')loadNotes()
   if(name===\'todos\')loadTodos()
 }
-
 function connectDrive(){window.location.href=\'/auth\'}
-
 async function loadDrive(){
   const r=await fetch(\'/drive/files\')
   const data=await r.json()
@@ -155,7 +153,6 @@ async function loadDrive(){
       <button class="del-btn" onclick="deleteFile(\'${f.id}\')">🗑️</button>
     </div>`).join(\'\')
 }
-
 async function uploadToDrive(){
   const files=document.getElementById(\'driveFileInput\').files
   if(!files.length)return alert(\'Select files!\')
@@ -164,17 +161,14 @@ async function uploadToDrive(){
   await fetch(\'/drive/upload\',{method:\'POST\',body:fd})
   loadDrive()
 }
-
 async function deleteFile(id){
   await fetch(\'/drive/delete/\'+id,{method:\'DELETE\'})
   loadDrive()
 }
-
 async function disconnectAccount(email){
   await fetch(\'/auth/disconnect\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({email})})
   loadDrive()
 }
-
 async function uploadPhotos(){
   const files=document.getElementById(\'photoInput\').files
   if(!files.length)return alert(\'Select photos!\')
@@ -183,7 +177,6 @@ async function uploadPhotos(){
   await fetch(\'/drive/upload\',{method:\'POST\',body:fd})
   loadPhotos()
 }
-
 async function loadPhotos(){
   const r=await fetch(\'/drive/files\')
   const data=await r.json()
@@ -193,7 +186,6 @@ async function loadPhotos(){
   if(!imgs.length){el.innerHTML=\'<div class="empty" style="grid-column:span 2">No photos yet</div>\';return}
   el.innerHTML=imgs.map(f=>`<img src="${f.thumb||f.url}" onclick="window.open(\'${f.url}\')">`).join(\'\')
 }
-
 async function saveNote(){
   const title=document.getElementById(\'noteTitle\').value
   const text=document.getElementById(\'noteText\').value
@@ -203,7 +195,6 @@ async function saveNote(){
   document.getElementById(\'noteText\').value=\'\'
   loadNotes()
 }
-
 async function loadNotes(){
   const r=await fetch(\'/notes\')
   const data=await r.json()
@@ -218,9 +209,7 @@ async function loadNotes(){
       </div>
     </div>`).join(\'\')
 }
-
 async function deleteNote(i){await fetch(\'/notes/\'+i,{method:\'DELETE\'});loadNotes()}
-
 async function addTodo(){
   const text=document.getElementById(\'todoInput\').value
   if(!text)return
@@ -228,7 +217,6 @@ async function addTodo(){
   document.getElementById(\'todoInput\').value=\'\'
   loadTodos()
 }
-
 async function loadTodos(){
   const r=await fetch(\'/todos\')
   const data=await r.json()
@@ -241,10 +229,8 @@ async function loadTodos(){
       <button class="del-btn" onclick="deleteTodo(${i})">🗑️</button>
     </div>`).join(\'\')
 }
-
 async function toggleTodo(i){await fetch(\'/todos/\'+i,{method:\'PATCH\'});loadTodos()}
 async function deleteTodo(i){await fetch(\'/todos/\'+i,{method:\'DELETE\'});loadTodos()}
-
 loadDrive()
 </script>
 </body>
@@ -272,11 +258,10 @@ def callback():
         'token_uri': credentials.token_uri,
         'client_id': credentials.client_id,
         'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
+        'scopes': list(credentials.scopes) if credentials.scopes else []
     }
-    import requests as req
-token_info = req.get(f'https://www.googleapis.com/oauth2/v1/userinfo?access_token={credentials.token}').json()
-email = token_info.get('email', 'unknown@gmail.com')
+    token_info = req.get(f'https://www.googleapis.com/oauth2/v1/userinfo?access_token={credentials.token}').json()
+    email = token_info.get('email', 'unknown@gmail.com')
     accounts = session.get('accounts', {})
     accounts[email] = creds_data
     session['accounts'] = accounts
@@ -300,13 +285,23 @@ def drive_files():
     account_info = []
     for email, creds_data in accounts.items():
         try:
-            creds = Credentials(**{k: v for k, v in creds_data.items() if k != 'scopes'})
+            creds = Credentials(
+                token=creds_data['token'],
+                refresh_token=creds_data.get('refresh_token'),
+                token_uri=creds_data['token_uri'],
+                client_id=creds_data['client_id'],
+                client_secret=creds_data['client_secret']
+            )
             service = build('drive', 'v3', credentials=creds)
-            results = service.files().list(pageSize=50, fields="files(id,name,mimeType,size,webViewLink,thumbnailLink)").execute()
+            results = service.files().list(
+                pageSize=50,
+                fields="files(id,name,mimeType,size,webViewLink,thumbnailLink)"
+            ).execute()
             files = results.get('files', [])
             for f in files:
                 all_files.append({
-                    'id': f['id'], 'name': f['name'],
+                    'id': f['id'],
+                    'name': f['name'],
                     'url': f.get('webViewLink', ''),
                     'thumb': f.get('thumbnailLink', ''),
                     'account': email
@@ -331,7 +326,14 @@ def drive_upload():
     if not accounts:
         return jsonify({'error': 'No accounts'})
     email = list(accounts.keys())[0]
-    creds = Credentials(**{k: v for k, v in accounts[email].items() if k != 'scopes'})
+    creds_data = accounts[email]
+    creds = Credentials(
+        token=creds_data['token'],
+        refresh_token=creds_data.get('refresh_token'),
+        token_uri=creds_data['token_uri'],
+        client_id=creds_data['client_id'],
+        client_secret=creds_data['client_secret']
+    )
     service = build('drive', 'v3', credentials=creds)
     for f in request.files.getlist('files'):
         media = MediaIoBaseUpload(io.BytesIO(f.read()), mimetype=f.content_type)
@@ -345,7 +347,13 @@ def drive_delete(file_id):
         return jsonify({'error': 'No accounts'})
     for email, creds_data in accounts.items():
         try:
-            creds = Credentials(**{k: v for k, v in creds_data.items() if k != 'scopes'})
+            creds = Credentials(
+                token=creds_data['token'],
+                refresh_token=creds_data.get('refresh_token'),
+                token_uri=creds_data['token_uri'],
+                client_id=creds_data['client_id'],
+                client_secret=creds_data['client_secret']
+            )
             service = build('drive', 'v3', credentials=creds)
             service.files().delete(fileId=file_id).execute()
             break
@@ -353,68 +361,68 @@ def drive_delete(file_id):
             pass
     return jsonify({'ok': True})
 
-@app.route('/notes', methods=['GET','POST'])
+@app.route('/notes', methods=['GET', 'POST'])
 def notes():
     from datetime import datetime
-    import json
     NOTES_FILE = '/tmp/notes.json'
-    def load(): 
+    def load():
         try:
             with open(NOTES_FILE) as f: return json.load(f)
         except: return []
     def save(d):
-        with open(NOTES_FILE,'w') as f: json.dump(d,f)
-    if request.method=='POST':
-        data=load(); note=request.json
-        note['date']=datetime.now().strftime('%d %b %Y')
-        data.append(note); save(data)
-        return jsonify({'ok':True})
+        with open(NOTES_FILE, 'w') as f: json.dump(d, f)
+    if request.method == 'POST':
+        data = load()
+        note = request.json
+        note['date'] = datetime.now().strftime('%d %b %Y')
+        data.append(note)
+        save(data)
+        return jsonify({'ok': True})
     return jsonify(load())
 
 @app.route('/notes/<int:i>', methods=['DELETE'])
 def delete_note(i):
-    import json
     NOTES_FILE = '/tmp/notes.json'
     def load():
         try:
             with open(NOTES_FILE) as f: return json.load(f)
         except: return []
-    data=load()
-    if i<len(data): data.pop(i)
-    with open(NOTES_FILE,'w') as f: json.dump(data,f)
-    return jsonify({'ok':True})
+    data = load()
+    if i < len(data): data.pop(i)
+    with open(NOTES_FILE, 'w') as f: json.dump(data, f)
+    return jsonify({'ok': True})
 
-@app.route('/todos', methods=['GET','POST'])
+@app.route('/todos', methods=['GET', 'POST'])
 def todos():
-    import json
     TODO_FILE = '/tmp/todos.json'
     def load():
         try:
             with open(TODO_FILE) as f: return json.load(f)
         except: return []
     def save(d):
-        with open(TODO_FILE,'w') as f: json.dump(d,f)
-    if request.method=='POST':
-        data=load(); data.append({'text':request.json['text'],'done':False}); save(data)
-        return jsonify({'ok':True})
+        with open(TODO_FILE, 'w') as f: json.dump(d, f)
+    if request.method == 'POST':
+        data = load()
+        data.append({'text': request.json['text'], 'done': False})
+        save(data)
+        return jsonify({'ok': True})
     return jsonify(load())
 
-@app.route('/todos/<int:i>', methods=['DELETE','PATCH'])
+@app.route('/todos/<int:i>', methods=['DELETE', 'PATCH'])
 def todo_action(i):
-    import json
     TODO_FILE = '/tmp/todos.json'
     def load():
         try:
             with open(TODO_FILE) as f: return json.load(f)
         except: return []
     def save(d):
-        with open(TODO_FILE,'w') as f: json.dump(d,f)
-    data=load()
-    if i<len(data):
-        if request.method=='DELETE': data.pop(i)
-        else: data[i]['done']=not data[i]['done']
+        with open(TODO_FILE, 'w') as f: json.dump(d, f)
+    data = load()
+    if i < len(data):
+        if request.method == 'DELETE': data.pop(i)
+        else: data[i]['done'] = not data[i]['done']
     save(data)
-    return jsonify({'ok':True})
+    return jsonify({'ok': True})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
