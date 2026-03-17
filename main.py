@@ -21,7 +21,7 @@ SCOPES = [
 ]
 
 def get_flow():
-    return Flow.from_client_config(
+    flow = Flow.from_client_config(
         {"web": {
             "client_id": CLIENT_ID,
             "client_secret": CLIENT_SECRET,
@@ -32,6 +32,8 @@ def get_flow():
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI
     )
+    flow.code_verifier = None
+    return flow
 
 HTML = '''<!DOCTYPE html>
 <html>
