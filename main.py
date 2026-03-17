@@ -8,7 +8,7 @@ import os, json, io
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'tonoy-secret-2026')
 
-CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+CLIENT_ID = os.environ.get('https://565165560969-p4js10k00f243sona6pbul1obi7ck17i.apps.googleusercontent.com')
 CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 APP_URL = os.environ.get('APP_URL', 'https://personal-gallery-production-e2b9.up.railway.app')
 REDIRECT_URI = APP_URL + '/callback'
