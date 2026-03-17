@@ -274,9 +274,9 @@ def callback():
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes
     }
-    service = build('oauth2', 'v2', credentials=credentials)
-    user_info = service.userinfo().get().execute()
-    email = user_info['email']
+    import requests as req
+token_info = req.get(f'https://www.googleapis.com/oauth2/v1/userinfo?access_token={credentials.token}').json()
+email = token_info.get('email', 'unknown@gmail.com')
     accounts = session.get('accounts', {})
     accounts[email] = creds_data
     session['accounts'] = accounts
