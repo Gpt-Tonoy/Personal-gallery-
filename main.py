@@ -253,15 +253,14 @@ def drive_files():
         try:
             creds = Credentials(**{k: v for k, v in cd.items() if k != 'scopes'})
             svc = build('drive', 'v3', credentials=creds)
-            for f in svc.files().list(pageSize=50, fields="files(id,name,mimeType,webViewLink,thumbnailLink)").execute().get('files', []):
-                all_files.append({'id': f['id'], 'name': f['name'], 'url': f.get('webViewLink', ''), 'thumb': f.get('thumbnailLink', '')})
+            for f in svc.files().list(pageSize=50, fields="files(id,name,mimeType,webViewLink,thumbnailLink,webContentLink)").execute().get('files', []):
+                all_files.append({'id': f['id'], 'name': f['name'], 'url': f.get('webContentLink', f.get('webViewLink', '')), 'thumb': f.get('thumbnailLink', '')})
             q = svc.about().get(fields='storageQuota').execute().get('storageQuota', {})
             used, total = int(q.get('usage', 0)), int(q.get('limit', 16106127360))
             account_info.append({'email': email, 'used': f'{used/1e9:.1f} GB', 'total': f'{total/1e9:.1f} GB', 'percent': min(100, int(used/total*100))})
         except:
             pass
     return jsonify({'files': all_files, 'accounts': account_info})
-
 @app.route('/drive/upload', methods=['POST'])
 def drive_upload():
     accounts = session.get('accounts', {})
