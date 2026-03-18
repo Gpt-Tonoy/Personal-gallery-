@@ -148,10 +148,10 @@ input[type=text],input[type=password]{width:100%;padding:12px;background:#222;bo
     <div id="headerAvatar" onclick="openProfile()"></div>
     <h1 id="headerName">Gallery</h1>
   </div>
-  <div class="header-btns">
+<div class="header-btns">
     <button class="icon-btn" onclick="openUpload()">⬆️</button>
-    <button class="icon-btn" onclick="window.location.href=\'/auth\'">➕</button>
-  </div>
+    <a href="/auth" class="icon-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center">➕</a>
+</div>
 </div>
 
 <div class="storage-section">
