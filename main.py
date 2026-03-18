@@ -153,7 +153,9 @@ input[type=text],input[type=password]{width:100%;padding:12px;background:#222;bo
     <a href="/auth" class="icon-btn" style="text-decoration:none;display:flex;align-items:center;justify-content:center">➕</a>
 </div>
 </div>
-
+<div style="position:fixed;top:62px;left:0;right:0;z-index:98;background:#1a1a3e;padding:8px 16px;text-align:center">
+  <a href="/auth" style="color:#4285f4;font-size:14px;text-decoration:none">+ Connect Google Drive Account</a>
+</div>
 <div class="storage-section">
   <div class="storage-total">
     <span id="storageText">Loading...</span>
