@@ -212,6 +212,7 @@ def auth():
 def callback():
     try:
         flow = get_flow()
+        os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
         flow.fetch_token(authorization_response=request.url.replace('http://', 'https://'))
         creds = flow.credentials
         creds_data = {
