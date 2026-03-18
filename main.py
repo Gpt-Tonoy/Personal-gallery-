@@ -19,11 +19,13 @@ REDIRECT_URI = 'https://personal-gallery-production-e2b9.up.railway.app/callback
 SCOPES = ['https://www.googleapis.com/auth/drive', 'openid', 'https://www.googleapis.com/auth/userinfo.email']
 
 def get_flow():
-    return Flow.from_client_config(
+    flow = Flow.from_client_config(
         {"web": {"client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
                  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                  "token_uri": "https://oauth2.googleapis.com/token"}},
         scopes=SCOPES, redirect_uri=REDIRECT_URI)
+    flow.code_verifier = ''
+    return flow
 
 HTML = '''<!DOCTYPE html>
 <html>
