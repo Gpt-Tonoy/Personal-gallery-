@@ -261,6 +261,7 @@ def drive_files():
         except:
             pass
     return jsonify({'files': all_files, 'accounts': account_info})
+
 @app.route('/drive/upload', methods=['POST'])
 def drive_upload():
     accounts = session.get('accounts', {})
@@ -269,7 +270,14 @@ def drive_upload():
     cd = list(accounts.values())[0]
     svc = build('drive', 'v3', credentials=Credentials(**{k: v for k, v in cd.items() if k != 'scopes'}))
     for f in request.files.getlist('files'):
-        svc.files().create(body={'name': f.filename}, media_body=MediaIoBaseUpload(io.BytesIO(f.read()), mimetype=f.content_type)).execute()
+        file = svc.files().create(
+            body={'name': f.filename},
+            media_body=MediaIoBaseUpload(io.BytesIO(f.read()), mimetype=f.content_type)
+        ).execute()
+        svc.permissions().create(
+            fileId=file['id'],
+            body={'role': 'reader', 'type': 'anyone'}
+        ).execute()
     return jsonify({'ok': True})
 
 @app.route('/drive/delete/<file_id>', methods=['DELETE'])
@@ -286,8 +294,7 @@ def drive_delete(file_id):
 def notes():
     f = '/tmp/notes.json'
     def load():
-        try:
-            return json.load(open(f))
+        try: return json.load(open(f))
         except: return []
     def save(d): json.dump(d, open(f, 'w'))
     if request.method == 'POST':
