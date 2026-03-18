@@ -28,173 +28,278 @@ def get_flow():
     return flow
 
 HTML = '''<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>M. Tonoy\'s Gallery</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>M. Tonoy Gallery</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:\'Segoe UI\',sans-serif;background:#0a0a14;color:white;min-height:100vh}
-.header{background:linear-gradient(135deg,#1a1a3e,#0d0d2b);padding:20px;text-align:center;border-bottom:1px solid #2a2a5a}
-.logo{font-size:28px;font-weight:bold;color:#7c6fff}.logo span{color:white}
-.tabs{display:flex;background:#111125;border-bottom:1px solid #2a2a5a;overflow-x:auto}
-.tab{flex:1;padding:12px 5px;text-align:center;font-size:12px;color:#888;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
-.tab.active{color:#7c6fff;border-bottom:2px solid #7c6fff}
-.section{display:none;padding:15px}.section.active{display:block}
-.card{background:#1a1a3e;border:1px solid #2a2a5a;border-radius:12px;padding:15px;margin-bottom:10px}
-.btn{width:100%;padding:12px;background:linear-gradient(135deg,#7c6fff,#5a4fcf);color:white;border:none;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;margin-top:8px}
-.btn-g{background:linear-gradient(135deg,#4285f4,#34a853)}
-.btn-r{background:linear-gradient(135deg,#ff4757,#c0392b);width:auto;padding:5px 10px;font-size:11px;margin:0}
-input,textarea{width:100%;padding:10px;background:#0d0d2b;border:1px solid #2a2a5a;border-radius:8px;color:white;font-size:14px;margin-top:6px}
-textarea{height:80px;resize:none}
-.fi{display:flex;align-items:center;justify-content:space-between;padding:10px;background:#0d0d2b;border-radius:8px;margin-bottom:8px}
-.fi span{font-size:13px;color:#aaa;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.db{padding:5px 10px;background:#7c6fff;border:none;border-radius:6px;color:white;font-size:11px;cursor:pointer;margin-left:8px}
-.del{padding:5px 10px;background:#ff4757;border:none;border-radius:6px;color:white;font-size:11px;cursor:pointer;margin-left:4px}
-.ni{background:#0d0d2b;border-radius:8px;padding:10px;margin-bottom:8px}
-.ni p{font-size:13px;color:#ccc;margin-bottom:5px}
-.ni small{color:#555;font-size:11px}
-.ti{display:flex;align-items:center;gap:10px;padding:10px;background:#0d0d2b;border-radius:8px;margin-bottom:8px}
-.ti input[type=checkbox]{width:18px;height:18px;cursor:pointer}
-.ti span{flex:1;font-size:13px}
-.done{text-decoration:line-through;color:#555!important}
-.pg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pg img{width:100%;height:120px;object-fit:cover;border-radius:8px;border:1px solid #2a2a5a}
-.empty{text-align:center;color:#555;padding:30px;font-size:13px}
-.ua{border:2px dashed #2a2a5a;border-radius:12px;padding:20px;text-align:center;color:#555;margin-bottom:10px}
-.ac{background:#0d0d2b;border:1px solid #2a2a5a;border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.sb{background:#2a2a5a;border-radius:5px;height:6px;margin-top:5px}
-.sf{background:#7c6fff;border-radius:5px;height:6px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
-.sc{background:#1a1a3e;border:1px solid #2a2a5a;border-radius:10px;padding:15px;text-align:center}
-.sc h2{font-size:24px;color:#7c6fff}
-.sc p{color:#888;font-size:11px;margin-top:4px;text-transform:uppercase}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;background:#000;color:#fff;min-height:100vh;overflow-x:hidden}
+.header{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:20px;font-weight:600;color:#fff}
+.header-btns{display:flex;gap:10px}
+.icon-btn{background:rgba(255,255,255,0.1);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.storage-bar{background:rgba(255,255,255,0.05);padding:8px 16px;margin-top:60px;display:flex;gap:10px;overflow-x:auto;scrollbar-width:none}
+.storage-bar::-webkit-scrollbar{display:none}
+.storage-chip{background:rgba(255,255,255,0.1);border-radius:20px;padding:6px 12px;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.storage-chip .dot{width:8px;height:8px;border-radius:50%;background:#4285f4}
+.tabs{display:flex;background:#111;border-bottom:1px solid #222;position:sticky;top:60px;z-index:99}
+.tab{flex:1;padding:12px;text-align:center;font-size:13px;color:#888;cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:#fff;border-bottom:2px solid #fff}
+.section{display:none;padding-bottom:80px}.section.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px}
+.media-item{position:relative;aspect-ratio:1;cursor:pointer;overflow:hidden;background:#111}
+.media-item img{width:100%;height:100%;object-fit:cover;transition:opacity 0.2s}
+.media-item:active img{opacity:0.7}
+.play-icon{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.7);border-radius:4px;padding:2px 6px;font-size:10px}
+.media-duration{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.7);border-radius:4px;padding:2px 5px;font-size:10px}
+.upload-fab{position:fixed;bottom:20px;right:20px;z-index:200;background:#4285f4;border:none;color:#fff;width:56px;height:56px;border-radius:50%;font-size:24px;cursor:pointer;box-shadow:0 4px 20px rgba(66,133,244,0.5);display:flex;align-items:center;justify-content:center}
+.modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.98);flex-direction:column}
+.modal.open{display:flex}
+.modal-header{padding:16px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,0.5)}
+.modal-close{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
+.modal-title{font-size:16px;font-weight:500}
+.modal-body{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.modal-body img{max-width:100%;max-height:100%;object-fit:contain}
+.modal-body iframe{width:100%;height:100%;border:none}
+.modal-footer{padding:16px;display:flex;gap:12px;justify-content:center;background:rgba(0,0,0,0.5)}
+.modal-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:10px 20px;border-radius:25px;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px}
+.modal-btn.primary{background:#4285f4}
+.upload-modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.9);flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.upload-modal.open{display:flex}
+.upload-box{background:#111;border-radius:20px;padding:30px;width:100%;max-width:400px;text-align:center}
+.upload-box h2{font-size:18px;margin-bottom:20px}
+.upload-area{border:2px dashed #333;border-radius:12px;padding:30px;margin-bottom:15px;cursor:pointer}
+.upload-area input{display:none}
+.acc-list{padding:16px}
+.acc-card{background:#111;border-radius:12px;padding:16px;margin-bottom:12px}
+.acc-email{font-size:14px;margin-bottom:8px}
+.acc-bar{background:#222;border-radius:4px;height:4px;margin-bottom:6px}
+.acc-fill{background:#4285f4;border-radius:4px;height:4px}
+.acc-info{font-size:11px;color:#888;display:flex;justify-content:space-between}
+.connect-btn{width:100%;background:#4285f4;border:none;color:#fff;padding:14px;border-radius:12px;font-size:15px;cursor:pointer;margin-top:12px}
+.remove-btn{background:rgba(255,59,48,0.2);border:1px solid rgba(255,59,48,0.3);color:#ff3b30;padding:5px 12px;border-radius:20px;font-size:11px;cursor:pointer;float:right}
+.empty{text-align:center;padding:60px 20px;color:#555}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.progress{display:none;position:fixed;top:0;left:0;right:0;height:3px;background:#4285f4;z-index:999;animation:progress 2s ease infinite}
+@keyframes progress{0%{width:0%}100%{width:100%}}
 </style>
 </head>
 <body>
-<div class="header"><div class="logo">☁️ M. Tonoy\'s <span>Gallery</span></div></div>
+
+<div class="header">
+  <h1>📸 M. Tonoy</h1>
+  <div class="header-btns">
+    <button class="icon-btn" onclick="showAccounts()">👤</button>
+    <button class="icon-btn" onclick="openUpload()">☁️</button>
+  </div>
+</div>
+
+<div class="storage-bar" id="storageBar">
+  <div class="storage-chip">Loading...</div>
+</div>
+
 <div class="tabs">
-  <div class="tab active" onclick="showTab(\'drive\')">☁️ Drive</div>
-  <div class="tab" onclick="showTab(\'photos\')">🖼️ Photos</div>
-  <div class="tab" onclick="showTab(\'notes\')">📝 Notes</div>
-  <div class="tab" onclick="showTab(\'todos\')">✅ To-Do</div>
+  <div class="tab active" onclick="showTab(\'photos\')">Photos</div>
+  <div class="tab" onclick="showTab(\'videos\')">Videos</div>
+  <div class="tab" onclick="showTab(\'all\')">All Files</div>
+  <div class="tab" onclick="showTab(\'accounts\')">Drives</div>
 </div>
-<div id="drive" class="section active">
-  <div class="stats">
-    <div class="sc"><h2 id="tFiles">0</h2><p>Total Files</p></div>
-    <div class="sc"><h2 id="tStorage">0 GB</h2><p>Used Storage</p></div>
-  </div>
-  <div class="card">
-    <div id="accList"><p style="color:#888;font-size:13px">No accounts connected</p></div>
-    <button class="btn btn-g" onclick="window.location.href=\'/auth\'">+ Connect Google Drive</button>
-  </div>
-  <div class="card">
-    <div class="ua">📤 Upload to Drive</div>
-    <input type="file" id="dfi" multiple>
-    <button class="btn" onclick="uploadDrive()">Upload to Drive</button>
-  </div>
-  <div id="dfl"></div>
+
+<div id="photos" class="section active">
+  <div class="grid" id="photoGrid"></div>
 </div>
-<div id="photos" class="section">
-  <div class="card">
-    <input type="file" id="pfi" accept="image/*" multiple>
-    <button class="btn" onclick="uploadPhotos()">Upload Photos</button>
-  </div>
-  <div class="pg" id="pg"></div>
+
+<div id="videos" class="section">
+  <div class="grid" id="videoGrid"></div>
 </div>
-<div id="notes" class="section">
-  <div class="card">
-    <input type="text" id="nt" placeholder="Title">
-    <textarea id="nb" placeholder="Write your note..."></textarea>
-    <button class="btn" onclick="saveNote()">Save Note</button>
-  </div>
-  <div id="nl"></div>
+
+<div id="all" class="section">
+  <div id="allList" style="padding:8px"></div>
 </div>
-<div id="todos" class="section">
-  <div class="card">
-    <input type="text" id="ti" placeholder="Add new task..." onkeypress="if(event.key==\'Enter\')addTodo()">
-    <button class="btn" onclick="addTodo()">Add Task</button>
+
+<div id="accounts" class="section">
+  <div class="acc-list" id="accList"></div>
+  <div style="padding:0 16px">
+    <button class="connect-btn" onclick="window.location.href=\'/auth\'">+ Connect Google Drive</button>
   </div>
-  <div id="tl"></div>
 </div>
+
+<button class="upload-fab" onclick="openUpload()">+</button>
+
+<!-- Media Modal -->
+<div class="modal" id="mediaModal">
+  <div class="modal-header">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <span class="modal-title" id="modalTitle">Photo</span>
+    <span></span>
+  </div>
+  <div class="modal-body" id="modalBody"></div>
+  <div class="modal-footer">
+    <button class="modal-btn" onclick="downloadFile()">⬇️ Download</button>
+    <button class="modal-btn primary" onclick="saveToGallery()">🖼️ Save to Gallery</button>
+  </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="upload-modal" id="uploadModal">
+  <div class="upload-box">
+    <h2>Upload Files</h2>
+    <div class="upload-area" onclick="document.getElementById(\'fileInput\').click()">
+      <div style="font-size:40px;margin-bottom:10px">📤</div>
+      <div style="color:#888;font-size:14px">Tap to select files</div>
+      <input type="file" id="fileInput" multiple accept="image/*,video/*">
+    </div>
+    <div id="uploadStatus" style="color:#888;font-size:13px;margin-bottom:15px"></div>
+    <button class="connect-btn" onclick="uploadFiles()">Upload</button>
+    <button class="modal-btn" onclick="closeUpload()" style="width:100%;margin-top:10px;justify-content:center">Cancel</button>
+  </div>
+</div>
+
+<div class="progress" id="progress"></div>
+
 <script>
-function showTab(n){
-  document.querySelectorAll(\'.tab\').forEach((t,i)=>t.classList.toggle(\'active\',[\'drive\',\'photos\',\'notes\',\'todos\'][i]===n))
+let currentFile = null
+let allFiles = []
+
+async function loadFiles(){
+  document.getElementById(\'progress\').style.display=\'block\'
+  try{
+    const d = await(await fetch(\'/drive/files\')).json()
+    allFiles = d.files || []
+    
+    // Storage bar
+    const sb = document.getElementById(\'storageBar\')
+    if(d.accounts && d.accounts.length){
+      sb.innerHTML = d.accounts.map(a=>`
+        <div class="storage-chip">
+          <div class="dot"></div>
+          ${a.email.split(\'@\')[0]} · ${a.used}/${a.total}
+        </div>`).join(\'\')
+    } else {
+      sb.innerHTML=\'<div class="storage-chip">No drives connected</div>\'
+    }
+    
+    // Photos
+    const photos = allFiles.filter(f=>/\\.(jpg|jpeg|png|gif|webp|heic)/i.test(f.name))
+    const pg = document.getElementById(\'photoGrid\')
+    pg.innerHTML = photos.length ? photos.map(f=>`
+      <div class="media-item" onclick="openMedia(\'${f.id}\',\'${f.name}\',\'photo\',\'${f.url}\',\'${f.thumb}\')">
+        <img src="${f.thumb||f.url}" loading="lazy" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect fill=\\"#222\\"/><text y=\\"55\\" x=\\"50\\" text-anchor=\\"middle\\" fill=\\"#666\\" font-size=\\"30\\">📷</text></svg>\'">
+      </div>`).join(\'\') : \'<div class="empty" style="grid-column:span 3"><div class="empty-icon">📷</div><div>No photos yet</div></div>\'
+    
+    // Videos
+    const videos = allFiles.filter(f=>/\\.(mp4|mov|avi|mkv|webm|3gp)/i.test(f.name))
+    const vg = document.getElementById(\'videoGrid\')
+    vg.innerHTML = videos.length ? videos.map(f=>`
+      <div class="media-item" onclick="openMedia(\'${f.id}\',\'${f.name}\',\'video\',\'${f.url}\',\'${f.thumb}\')">
+        <img src="${f.thumb||\'data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 100 100\\"><rect fill=\\"#1a1a1a\\"/><text y=\\"55\\" x=\\"50\\" text-anchor=\\"middle\\" fill=\\"#666\\" font-size=\\"30\\">🎬</text></svg>\'}" loading="lazy">
+        <div class="play-icon">▶</div>
+      </div>`).join(\'\') : \'<div class="empty" style="grid-column:span 3"><div class="empty-icon">🎬</div><div>No videos yet</div></div>\'
+    
+    // All files
+    const al = document.getElementById(\'allList\')
+    al.innerHTML = allFiles.length ? allFiles.map(f=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#111;border-radius:10px;margin-bottom:8px">
+        <div style="font-size:24px">${/\\.(jpg|jpeg|png|gif|webp)/i.test(f.name)?\'🖼️\':/\\.(mp4|mov|avi|mkv|webm)/i.test(f.name)?\'🎬\':\'📄\'}</div>
+        <div style="flex:1;overflow:hidden">
+          <div style="font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</div>
+        </div>
+        <button onclick="window.open(\'${f.url}\')" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer">⬇️</button>
+      </div>`).join(\'\') : \'<div class="empty"><div class="empty-icon">📁</div><div>No files yet</div></div>\'
+    
+    // Accounts
+    showAccList(d.accounts || [])
+    
+  }catch(e){console.log(e)}
+  document.getElementById(\'progress\').style.display=\'none\'
+}
+
+function showAccList(accounts){
+  const al = document.getElementById(\'accList\')
+  al.innerHTML = accounts.length ? accounts.map(a=>`
+    <div class="acc-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="acc-email">${a.email}</div>
+        <button class="remove-btn" onclick="removeAcc(\'${a.email}\')">Remove</button>
+      </div>
+      <div class="acc-bar"><div class="acc-fill" style="width:${a.percent}%"></div></div>
+      <div class="acc-info"><span>${a.used} used</span><span>${a.total} total</span></div>
+    </div>`).join(\'\') : \'<div class="empty"><div class="empty-icon">☁️</div><div>No drives connected</div></div>\'
+}
+
+function openMedia(id, name, type, url, thumb){
+  currentFile = {id, name, type, url, thumb}
+  document.getElementById(\'modalTitle\').textContent = name
+  const body = document.getElementById(\'modalBody\')
+  if(type === \'photo\'){
+    body.innerHTML = `<img src="${url||thumb}" style="max-width:100%;max-height:80vh;object-fit:contain">`
+  } else {
+    body.innerHTML = `<iframe src="https://drive.google.com/file/d/${id}/preview" allowfullscreen style="width:100%;height:60vh"></iframe>`
+  }
+  document.getElementById(\'mediaModal\').classList.add(\'open\')
+}
+
+function closeModal(){
+  document.getElementById(\'mediaModal\').classList.remove(\'open\')
+  document.getElementById(\'modalBody\').innerHTML = \'\'
+  currentFile = null
+}
+
+function downloadFile(){
+  if(currentFile) window.open(currentFile.url)
+}
+
+function saveToGallery(){
+  if(!currentFile) return
+  const a = document.createElement(\'a\')
+  a.href = currentFile.url
+  a.download = currentFile.name
+  a.click()
+}
+
+function openUpload(){ document.getElementById(\'uploadModal\').classList.add(\'open\') }
+function closeUpload(){ document.getElementById(\'uploadModal\').classList.remove(\'open\') }
+
+document.getElementById(\'fileInput\').addEventListener(\'change\', function(){
+  const count = this.files.length
+  document.getElementById(\'uploadStatus\').textContent = count > 0 ? `${count} file(s) selected` : \'\'
+})
+
+async function uploadFiles(){
+  const files = document.getElementById(\'fileInput\').files
+  if(!files.length) return alert(\'Select files first!\')
+  document.getElementById(\'uploadStatus\').textContent = \'Uploading...\'
+  document.getElementById(\'progress\').style.display = \'block\'
+  const fd = new FormData()
+  for(let f of files) fd.append(\'files\', f)
+  try{
+    await fetch(\'/drive/upload\', {method:\'POST\', body:fd})
+    document.getElementById(\'uploadStatus\').textContent = \'Upload complete! ✅\'
+    setTimeout(()=>{ closeUpload(); loadFiles() }, 1000)
+  }catch(e){
+    document.getElementById(\'uploadStatus\').textContent = \'Upload failed ❌\'
+  }
+  document.getElementById(\'progress\').style.display = \'none\'
+}
+
+async function removeAcc(email){
+  await fetch(\'/auth/disconnect\', {method:\'POST\', headers:{\'Content-Type\':\'application/json\'}, body:JSON.stringify({email})})
+  loadFiles()
+}
+
+function showTab(name){
+  document.querySelectorAll(\'.tab\').forEach((t,i)=>t.classList.toggle(\'active\',[\'photos\',\'videos\',\'all\',\'accounts\'][i]===name))
   document.querySelectorAll(\'.section\').forEach(s=>s.classList.remove(\'active\'))
-  document.getElementById(n).classList.add(\'active\')
-  if(n===\'drive\')loadDrive()
-  if(n===\'photos\')loadPhotos()
-  if(n===\'notes\')loadNotes()
-  if(n===\'todos\')loadTodos()
+  document.getElementById(name).classList.add(\'active\')
 }
-async function loadDrive(){
-  try{
-    const d=await(await fetch(\'/drive/files\')).json()
-    const el=document.getElementById(\'dfl\')
-    const al=document.getElementById(\'accList\')
-    if(!d.accounts||!d.accounts.length){al.innerHTML=\'<p style="color:#888;font-size:13px">No accounts connected</p>\';el.innerHTML=\'\';return}
-    document.getElementById(\'tFiles\').textContent=d.files?d.files.length:0
-    al.innerHTML=d.accounts.map(a=>`<div class="ac"><div><p style="font-size:13px">${a.email}</p><div class="sb"><div class="sf" style="width:${a.percent}%"></div></div><p style="font-size:11px;color:#888;margin-top:3px">${a.used}/${a.total}</p></div><button class="btn-r btn" onclick="removeAcc(\'${a.email}\')">Remove</button></div>`).join(\'\')
-    if(!d.files||!d.files.length){el.innerHTML=\'<div class="empty">No files yet</div>\';return}
-    el.innerHTML=d.files.map(f=>`<div class="fi"><span>📄 ${f.name}</span><button class="db" onclick="window.open(\'${f.url}\')">⬇️</button><button class="del" onclick="delFile(\'${f.id}\')">🗑️</button></div>`).join(\'\')
-  }catch(e){}
-}
-async function uploadDrive(){
-  const files=document.getElementById(\'dfi\').files
-  if(!files.length)return alert(\'Select files!\')
-  const fd=new FormData()
-  for(let f of files)fd.append(\'files\',f)
-  await fetch(\'/drive/upload\',{method:\'POST\',body:fd})
-  loadDrive()
-}
-async function delFile(id){await fetch(\'/drive/delete/\'+id,{method:\'DELETE\'});loadDrive()}
-async function removeAcc(email){await fetch(\'/auth/disconnect\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({email})});loadDrive()}
-async function uploadPhotos(){
-  const files=document.getElementById(\'pfi\').files
-  if(!files.length)return alert(\'Select photos!\')
-  const fd=new FormData()
-  for(let f of files)fd.append(\'files\',f)
-  await fetch(\'/drive/upload\',{method:\'POST\',body:fd})
-  loadPhotos()
-}
-async function loadPhotos(){
-  try{
-    const d=await(await fetch(\'/drive/files\')).json()
-    const el=document.getElementById(\'pg\')
-    if(!d.files||!d.files.length){el.innerHTML=\'<div class="empty" style="grid-column:span 2">Connect Google Drive first</div>\';return}
-    const imgs=d.files.filter(f=>/\\.(jpg|jpeg|png|gif|webp)/i.test(f.name))
-    el.innerHTML=imgs.length?imgs.map(f=>`<img src="${f.thumb||f.url}" onclick="window.open(\'${f.url}\')">`).join(\'\'):\'<div class="empty" style="grid-column:span 2">No photos yet</div>\'
-  }catch(e){}
-}
-async function saveNote(){
-  const t=document.getElementById(\'nt\').value,b=document.getElementById(\'nb\').value
-  if(!b)return alert(\'Write something!\')
-  await fetch(\'/notes\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({title:t,text:b})})
-  document.getElementById(\'nt\').value=\'\'
-  document.getElementById(\'nb\').value=\'\'
-  loadNotes()
-}
-async function loadNotes(){
-  const d=await(await fetch(\'/notes\')).json()
-  const el=document.getElementById(\'nl\')
-  el.innerHTML=d.length?d.map((n,i)=>`<div class="ni"><strong>${n.title||\'Note\'}</strong><p>${n.text}</p><div style="display:flex;justify-content:space-between;margin-top:5px"><small>${n.date}</small><button class="del" onclick="delNote(${i})">🗑️</button></div></div>`).join(\'\'):\'<div class="empty">No notes yet</div>\'
-}
-async function delNote(i){await fetch(\'/notes/\'+i,{method:\'DELETE\'});loadNotes()}
-async function addTodo(){
-  const t=document.getElementById(\'ti\').value
-  if(!t)return
-  await fetch(\'/todos\',{method:\'POST\',headers:{\'Content-Type\':\'application/json\'},body:JSON.stringify({text:t})})
-  document.getElementById(\'ti\').value=\'\'
-  loadTodos()
-}
-async function loadTodos(){
-  const d=await(await fetch(\'/todos\')).json()
-  const el=document.getElementById(\'tl\')
-  el.innerHTML=d.length?d.map((t,i)=>`<div class="ti"><input type="checkbox" ${t.done?\'checked\':\'\'} onchange="toggleTodo(${i})"><span class="${t.done?\'done\':\'\'}">${t.text}</span><button class="del" onclick="delTodo(${i})">🗑️</button></div>`).join(\'\'):\'<div class="empty">No tasks yet</div>\'
-}
-async function toggleTodo(i){await fetch(\'/todos/\'+i,{method:\'PATCH\'});loadTodos()}
-async function delTodo(i){await fetch(\'/todos/\'+i,{method:\'DELETE\'});loadTodos()}
-loadDrive()
+
+function showAccounts(){ showTab(\'accounts\') }
+
+loadFiles()
 </script>
 </body>
 </html>'''
@@ -253,11 +358,22 @@ def drive_files():
         try:
             creds = Credentials(**{k: v for k, v in cd.items() if k != 'scopes'})
             svc = build('drive', 'v3', credentials=creds)
-            for f in svc.files().list(pageSize=50, fields="files(id,name,mimeType,webViewLink,thumbnailLink,webContentLink)").execute().get('files', []):
-                all_files.append({'id': f['id'], 'name': f['name'], 'url': f.get('webContentLink', f.get('webViewLink', '')), 'thumb': f.get('thumbnailLink', '')})
+            for f in svc.files().list(pageSize=100, fields="files(id,name,mimeType,webViewLink,thumbnailLink,webContentLink)").execute().get('files', []):
+                all_files.append({
+                    'id': f['id'],
+                    'name': f['name'],
+                    'url': f.get('webContentLink', f.get('webViewLink', '')),
+                    'thumb': f.get('thumbnailLink', '')
+                })
             q = svc.about().get(fields='storageQuota').execute().get('storageQuota', {})
-            used, total = int(q.get('usage', 0)), int(q.get('limit', 16106127360))
-            account_info.append({'email': email, 'used': f'{used/1e9:.1f} GB', 'total': f'{total/1e9:.1f} GB', 'percent': min(100, int(used/total*100))})
+            used = int(q.get('usage', 0))
+            total = int(q.get('limit', 16106127360))
+            account_info.append({
+                'email': email,
+                'used': f'{used/1e9:.1f} GB',
+                'total': f'{total/1e9:.1f} GB',
+                'percent': min(100, int(used/total*100))
+            })
         except:
             pass
     return jsonify({'files': all_files, 'accounts': account_info})
@@ -288,53 +404,6 @@ def drive_delete(file_id):
             break
         except:
             pass
-    return jsonify({'ok': True})
-
-@app.route('/notes', methods=['GET', 'POST'])
-def notes():
-    f = '/tmp/notes.json'
-    def load():
-        try: return json.load(open(f))
-        except: return []
-    def save(d): json.dump(d, open(f, 'w'))
-    if request.method == 'POST':
-        d = load()
-        n = request.json
-        n['date'] = datetime.now().strftime('%d %b %Y')
-        d.append(n); save(d)
-        return jsonify({'ok': True})
-    return jsonify(load())
-
-@app.route('/notes/<int:i>', methods=['DELETE'])
-def del_note(i):
-    f = '/tmp/notes.json'
-    try: d = json.load(open(f))
-    except: d = []
-    if i < len(d): d.pop(i)
-    json.dump(d, open(f, 'w'))
-    return jsonify({'ok': True})
-
-@app.route('/todos', methods=['GET', 'POST'])
-def todos():
-    f = '/tmp/todos.json'
-    def load():
-        try: return json.load(open(f))
-        except: return []
-    def save(d): json.dump(d, open(f, 'w'))
-    if request.method == 'POST':
-        d = load(); d.append({'text': request.json['text'], 'done': False}); save(d)
-        return jsonify({'ok': True})
-    return jsonify(load())
-
-@app.route('/todos/<int:i>', methods=['DELETE', 'PATCH'])
-def todo_action(i):
-    f = '/tmp/todos.json'
-    try: d = json.load(open(f))
-    except: d = []
-    if i < len(d):
-        if request.method == 'DELETE': d.pop(i)
-        else: d[i]['done'] = not d[i]['done']
-    json.dump(d, open(f, 'w'))
     return jsonify({'ok': True})
 
 if __name__ == '__main__':
